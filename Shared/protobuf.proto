@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+option csharp_namespace = "BlazorShowcase.Data";
+
+service ScoresData {
+	rpc GetScores(ScoreRequest) returns (ScoreResponse);
+}
+
+message ScoreRequest {}
+
+message ScoreResponse {
+    repeated Score scores = 1;
+    int32 count = 2;
+}
+
+message Score {
+    string id = 1;
+    string streamId = 2;
+    int64 createdOn = 3;
+    string userName = 4;
+    string fullName = 5;
+    string ipAddress = 6;
+    string city = 7;
+    int32 riskScore = 8;
+}

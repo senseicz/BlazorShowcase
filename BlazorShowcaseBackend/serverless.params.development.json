@@ -1,0 +1,12 @@
+{
+  "Environment": "development",
+  "Region": "eu-west-1",
+  "ExecutionRoleArn": "arn:aws:iam::038008823330:role/fraud-lambda-worker-s3",
+  "SubnetIds": "subnet-0229f68f9e5aa4fce,subnet-09d18ffca7a79c8a7",
+  "SecurityGroups": "sg-067f49650edf67093",
+  "ListenerHttpsArn": "arn:aws:elasticloadbalancing:eu-west-1:038008823330:listener/app/fraud-fabric-alb/3343c804bb68d1a0/76b725bea34d0198",
+  "ListenerPriority": "16",
+  "CustomDomain": "tondatest.cibfrauddev.aws.dsarena.com",
+  "MapMigratedTag": "d-server-03v1njpggroxfq",
+  "AppId": "CI146774845"
+}
