@@ -1,7 +1,6 @@
-﻿
-namespace BlazorShowcaseBackend
+﻿namespace BlazorShowcaseBackend
 {
-    public class LambdaEntryPoint : Amazon.Lambda.AspNetCoreServer.ApplicationLoadBalancerFunction
+    public class LambdaEntryPointApiGw : Amazon.Lambda.AspNetCoreServer.APIGatewayProxyFunction
     {
         protected override void Init(IWebHostBuilder builder)
         {

@@ -1,3 +1,4 @@
+using Amazon.Lambda.APIGatewayEvents;
 using Amazon.Lambda.ApplicationLoadBalancerEvents;
 using Amazon.Lambda.Core;
 using Amazon.Lambda.RuntimeSupport;
@@ -15,9 +16,18 @@ public class Program
         }
         else
         {
-            var lambdaEntry = new LambdaEntryPoint();
+            //this is for ALB handling
+
+            //var lambdaEntry = new LambdaEntryPointAlb();
+            //var functionHandler =
+            //    (Func<ApplicationLoadBalancerRequest, ILambdaContext, Task<ApplicationLoadBalancerResponse>>)
+            //    (lambdaEntry.FunctionHandlerAsync);
+
+            //this is for ApiGateway handling
+
+            var lambdaEntry = new LambdaEntryPointApiGw();
             var functionHandler =
-                (Func<ApplicationLoadBalancerRequest, ILambdaContext, Task<ApplicationLoadBalancerResponse>>)
+                (Func<APIGatewayProxyRequest, ILambdaContext, Task<APIGatewayProxyResponse>>)
                 (lambdaEntry.FunctionHandlerAsync);
 
             using var handlerWrapper = HandlerWrapper.GetHandlerWrapper(functionHandler, new DefaultLambdaJsonSerializer());
