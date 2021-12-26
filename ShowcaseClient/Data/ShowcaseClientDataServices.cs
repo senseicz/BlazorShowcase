@@ -14,7 +14,7 @@ public static class ShowcaseClientDataServices
             configure(services, options);
             var httpClient = new HttpClient(new GrpcWebHandler(GrpcWebMode.GrpcWeb, options.MessageHandler!));
             var channel = GrpcChannel.ForAddress(options.BaseUri!, new GrpcChannelOptions { HttpClient = httpClient, MaxReceiveMessageSize = null });
-            return new BlazorShowcase.Data.AlertsData.AlertsDataClient(channel);
+            return new BlazorShowcase.Data.ScoresData.ScoresDataClient(channel);
         });
     }
 

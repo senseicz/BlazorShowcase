@@ -12,13 +12,13 @@ class DataSynchronizer
     public const string SqliteDbFilename = "app.db";
     private readonly Task firstTimeSetupTask;
     private readonly IDbContextFactory<ClientSideDbContext> dbContextFactory;
-    private readonly AlertsData.AlertsDataClient alertsData;
+    private readonly ScoresData.ScoresDataClient scoresData;
     private bool isSynchronizing;
 
-    public DataSynchronizer(IJSRuntime js, IDbContextFactory<ClientSideDbContext> dbContextFactory, AlertsData.AlertsDataClient alertsData)
+    public DataSynchronizer(IJSRuntime js, IDbContextFactory<ClientSideDbContext> dbContextFactory, ScoresData.ScoresDataClient scoresData)
     {
         this.dbContextFactory = dbContextFactory;
-        this.alertsData = alertsData;
+        this.scoresData = scoresData;
         firstTimeSetupTask = FirstTimeSetupAsync(js);
     }
 
@@ -72,30 +72,38 @@ class DataSynchronizer
             db.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
 
             // Begin fetching any updates to the dataset from the backend server
-            var mostRecentUpdate = db.Parts.OrderByDescending(p => p.ModifiedTicks).FirstOrDefault()?.ModifiedTicks;
+            var mostRecentUpdate = db.Scores.OrderByDescending(p => p.CreatedOn).FirstOrDefault()?.CreatedOn;
 
             var connection = db.Database.GetDbConnection();
             connection.Open();
 
-            while (true)
-            {
-                var request = new PartsRequest { MaxCount = 5000, ModifiedSinceTicks = mostRecentUpdate ?? -1 };
-                var response = await manufacturingData.GetPartsAsync(request);
-                var syncRemaining = response.ModifiedCount - response.Parts.Count;
-                SyncCompleted += response.Parts.Count;
-                SyncTotal = SyncCompleted + syncRemaining;
 
-                if (response.Parts.Count == 0)
-                {
-                    break;
-                }
-                else
-                {
-                    mostRecentUpdate = response.Parts.Last().ModifiedTicks;
-                    BulkInsert(connection, response.Parts);
-                    OnUpdate?.Invoke();
-                }
-            }
+            var request = new ScoreRequest { /*MaxCount = 5000, ModifiedSinceTicks = mostRecentUpdate ?? -1 */};
+            var response = await scoresData.GetScoresAsync(request);
+
+            BulkInsert(connection, response.Scores);
+            OnUpdate?.Invoke();
+
+
+            //while (true)
+            //{
+            //    var request = new ScoreRequest { /*MaxCount = 5000, ModifiedSinceTicks = mostRecentUpdate ?? -1 */};
+            //    var response = await scoresData.GetScoresAsync(request);
+            //    var syncRemaining = response.ModifiedCount - response.Parts.Count;
+            //    SyncCompleted += response.Parts.Count;
+            //    SyncTotal = SyncCompleted + syncRemaining;
+
+            //    if (response.Parts.Count == 0)
+            //    {
+            //        break;
+            //    }
+            //    else
+            //    {
+            //        mostRecentUpdate = response.Parts.Last().ModifiedTicks;
+            //        BulkInsert(connection, response.Parts);
+            //        OnUpdate?.Invoke();
+            //    }
+            //}
         }
         catch (Exception ex)
         {
@@ -108,36 +116,36 @@ class DataSynchronizer
         }
     }
 
-    private void BulkInsert(DbConnection connection, IEnumerable<Part> parts)
+    private void BulkInsert(DbConnection connection, IEnumerable<Score> scores)
     {
         // Since we're inserting so much data, we can save a huge amount of time by dropping down below EF Core and
         // using the fastest bulk insertion technique for Sqlite.
         using (var transaction = connection.BeginTransaction())
         {
             var command = connection.CreateCommand();
-            var partId = AddNamedParameter(command, "$PartId");
-            var category = AddNamedParameter(command, "$Category");
-            var subcategory = AddNamedParameter(command, "$Subcategory");
-            var name = AddNamedParameter(command, "$Name");
-            var location = AddNamedParameter(command, "$Location");
-            var stock = AddNamedParameter(command, "$Stock");
-            var priceCents = AddNamedParameter(command, "$PriceCents");
-            var modifiedTicks = AddNamedParameter(command, "$ModifiedTicks");
+            var id = AddNamedParameter(command, "Id");
+            var streamId = AddNamedParameter(command, "$StreamId");
+            var createdOn = AddNamedParameter(command, "$CreatedOn");
+            var userName = AddNamedParameter(command, "$UserName");
+            var fullName = AddNamedParameter(command, "$FullName");
+            var ipAddress = AddNamedParameter(command, "$IpAddress");
+            var city = AddNamedParameter(command, "$City");
+            var riskScore = AddNamedParameter(command, "$RiskScore");
 
             command.CommandText =
-                $"INSERT OR REPLACE INTO Parts (PartId, Category, Subcategory, Name, Location, Stock, PriceCents, ModifiedTicks) " +
-                $"VALUES ({partId.ParameterName}, {category.ParameterName}, {subcategory.ParameterName}, {name.ParameterName}, {location.ParameterName}, {stock.ParameterName}, {priceCents.ParameterName}, {modifiedTicks.ParameterName})";
+                $"INSERT OR REPLACE INTO Parts (Id, StreamId, CreatedOn, UserName, FullName, IpAddress, City, RiskScore) " +
+                $"VALUES ({id.ParameterName}, {streamId.ParameterName}, {createdOn.ParameterName}, {userName.ParameterName}, {fullName.ParameterName}, {ipAddress.ParameterName}, {city.ParameterName}, {riskScore.ParameterName})";
 
-            foreach (var part in parts)
+            foreach (var score in scores)
             {
-                partId.Value = part.PartId;
-                category.Value = part.Category;
-                subcategory.Value = part.Subcategory;
-                name.Value = part.Name;
-                location.Value = part.Location;
-                stock.Value = part.Stock;
-                priceCents.Value = part.PriceCents;
-                modifiedTicks.Value = part.ModifiedTicks;
+                id.Value = score.Id;
+                streamId.Value = score.StreamId;
+                createdOn.Value = score.CreatedOn;
+                userName.Value = score.UserName;
+                fullName.Value = score.FullName;
+                ipAddress.Value = score.IpAddress;
+                city.Value = score.City;
+                riskScore.Value = score.RiskScore;
                 command.ExecuteNonQuery();
             }
 

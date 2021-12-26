@@ -1,0 +1,27 @@
+﻿@namespace ShowcaseClient.Components
+@inherits AntDesign.AntDomComponentBase
+
+<Space Class="@ClassMapper.Class" Size="@("24")">
+    <SpaceItem>
+        <HeaderSearch Class="action search"
+                      Placeholder="Site Search"
+                      DefaultValue="umi ui"
+                      Options="DefaultOptions" />
+    </SpaceItem>
+    <SpaceItem>
+        <AntDesign.Tooltip Title="@("Help")" @*Placement="@PlacementType.Bottom"*@>
+            <Unbound>
+                <span @ref="@context.Current" class="action">
+                    <Icon Type="question-circle" Theme="outline" />
+                </span>
+            </Unbound>
+        </AntDesign.Tooltip>
+    </SpaceItem>
+    
+    <SpaceItem>
+        <AvatarDropdown Name="@_currentUser.Name"
+                        Avatar="@_currentUser.Avatar"
+                        MenuItems="@AvatarMenuItems"
+                        OnItemSelected="HandleSelectUser" />
+    </SpaceItem>
+</Space>
