@@ -8,10 +8,20 @@
     <base href="/" />
     <link href="css/bootstrap/bootstrap.min.css" rel="stylesheet" />
     <link href="css/app.css" rel="stylesheet" />
-    <link href="ShowcaseClient.styles.css" rel="stylesheet" />
+
+
+    <link href="_content/AntDesign/css/ant-design-blazor.css" rel="stylesheet" />
+    <link href="_content/AntDesign.ProLayout/css/ant-design-pro-layout-blazor.css" rel="stylesheet" />
+    <link href="./css/site.css" rel="stylesheet" />
+    <link href="BlazorAntDesign.styles.css" rel="stylesheet" />
+
+
 </head>
 
 <body>
+    <!--<blazor-app>
+        <div class="bg-gray-800 h-16"></div>
+    </blazor-app>-->
     <div id="app">
         <style>
             html,
@@ -55,8 +65,7 @@
                 -webkit-transition: -webkit-transform 0.3s cubic-bezier(0.78, 0.14, 0.15, 0.86);
                 transition: -webkit-transform 0.3s cubic-bezier(0.78, 0.14, 0.15, 0.86);
                 transition: transform 0.3s cubic-bezier(0.78, 0.14, 0.15, 0.86);
-                transition: transform 0.3s cubic-bezier(0.78, 0.14, 0.15, 0.86),
-                -webkit-transform 0.3s cubic-bezier(0.78, 0.14, 0.15, 0.86);
+                transition: transform 0.3s cubic-bezier(0.78, 0.14, 0.15, 0.86), -webkit-transform 0.3s cubic-bezier(0.78, 0.14, 0.15, 0.86);
             }
 
             .ant-spin-spinning {
@@ -91,31 +100,31 @@
                 animation: antSpinMove 1s infinite linear alternate;
             }
 
-            .ant-spin-dot-item:nth-child(1) {
-                top: 0;
-                left: 0;
-            }
+                .ant-spin-dot-item:nth-child(1) {
+                    top: 0;
+                    left: 0;
+                }
 
-            .ant-spin-dot-item:nth-child(2) {
-                top: 0;
-                right: 0;
-                -webkit-animation-delay: 0.4s;
-                animation-delay: 0.4s;
-            }
+                .ant-spin-dot-item:nth-child(2) {
+                    top: 0;
+                    right: 0;
+                    -webkit-animation-delay: 0.4s;
+                    animation-delay: 0.4s;
+                }
 
-            .ant-spin-dot-item:nth-child(3) {
-                right: 0;
-                bottom: 0;
-                -webkit-animation-delay: 0.8s;
-                animation-delay: 0.8s;
-            }
+                .ant-spin-dot-item:nth-child(3) {
+                    right: 0;
+                    bottom: 0;
+                    -webkit-animation-delay: 0.8s;
+                    animation-delay: 0.8s;
+                }
 
-            .ant-spin-dot-item:nth-child(4) {
-                bottom: 0;
-                left: 0;
-                -webkit-animation-delay: 1.2s;
-                animation-delay: 1.2s;
-            }
+                .ant-spin-dot-item:nth-child(4) {
+                    bottom: 0;
+                    left: 0;
+                    -webkit-animation-delay: 1.2s;
+                    animation-delay: 1.2s;
+                }
 
             .ant-spin-dot-spin {
                 -webkit-transform: rotate(45deg);
@@ -131,13 +140,12 @@
                 height: 32px;
             }
 
-            .ant-spin-lg .ant-spin-dot i {
-                width: 14px;
-                height: 14px;
-            }
+                .ant-spin-lg .ant-spin-dot i {
+                    width: 14px;
+                    height: 14px;
+                }
 
-            @media all and (-ms-high-contrast: none),
-            (-ms-high-contrast: active) {
+            @media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
                 .ant-spin-blur {
                     background: #fff;
                     opacity: 0.5;
@@ -171,38 +179,33 @@
             }
         </style>
         <div style="
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          flex-direction: column;
-          min-height: 420px;
-          height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            min-height: 420px;
+            height: 100%;
         ">
             <img src="./absa.svg" alt="logo" width="256" />
             <div class="page-loading-warp">
                 <div class="ant-spin ant-spin-lg ant-spin-spinning">
-                    <span class="ant-spin-dot ant-spin-dot-spin"><i class="ant-spin-dot-item"></i><i
-                            class="ant-spin-dot-item"></i><i class="ant-spin-dot-item"></i><i
-                            class="ant-spin-dot-item"></i></span>
+                    <span class="ant-spin-dot ant-spin-dot-spin">
+                        <i class="ant-spin-dot-item"></i><i class="ant-spin-dot-item"></i><i class="ant-spin-dot-item"></i><i class="ant-spin-dot-item"></i>
+                    </span>
                 </div>
             </div>
-            <!--<div style="display: flex; justify-content: center; align-items: center;">
-                <img src="https://gw.alipayobjects.com/zos/rmsportal/KDpgvguMpGfqaHPjicRK.svg" width="32"
-                     style="margin-right: 8px;" />
-                Ant Design Blazor
-            </div>-->
         </div>
-        
-        
-        
     </div>
+    <!--</blazor-app>-->
 
     <div id="blazor-error-ui">
         An unhandled error has occurred.
         <a href="" class="reload">Reload</a>
         <a class="dismiss">🗙</a>
     </div>
+    <script src="_content/AntDesign/js/ant-design-blazor.js"></script>
     <script src="_framework/blazor.webassembly.js"></script>
+    
 </body>
 
 </html>

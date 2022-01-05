@@ -1,3 +1,4 @@
+using AntDesign.ProLayout;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
@@ -12,7 +13,8 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.Logging.AddConfiguration(builder.Configuration.GetSection("Logging"));
 var onePassUri = builder.Configuration["OnePassUri"]!;
 var bffUri = builder.Configuration["BffUri"]!;
-builder.RootComponents.RegisterAsCustomElement<App>("blazor-app");
+//builder.RootComponents.RegisterAsCustomElement<App>("blazor-app");
+builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
 
@@ -44,6 +46,8 @@ builder.Services.AddScoped<AccountClaimsPrincipalFactory<RemoteUserAccount>, Off
 // Sets up EF Core with Sqlite
 builder.Services.AddShowcaseDataDbContext();
 
+builder.Services.AddAntDesign();
+builder.Services.Configure<ProSettings>(builder.Configuration.GetSection("ProSettings"));
 
 builder.Services.AddScoped<IUserService, UserService>();
 

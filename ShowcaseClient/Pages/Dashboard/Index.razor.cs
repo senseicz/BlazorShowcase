@@ -1,10 +1,8 @@
-﻿using AntDesign;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Rendering;
+﻿using Microsoft.AspNetCore.Components;
 
 namespace ShowcaseClient.Pages.Dashboard;
 
-public partial class Scores
+public partial class Index
 {
 
     private RenderFragment Info(string title, string value, bool bordered = false)

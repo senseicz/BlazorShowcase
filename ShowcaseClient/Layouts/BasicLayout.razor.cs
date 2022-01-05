@@ -1,34 +1,35 @@
 ﻿using AntDesign.ProLayout;
 
-namespace ShowcaseClient.Layouts;
-
-public partial class BasicLayout
+namespace ShowcaseClient.Layouts
 {
-    
-    private MenuDataItem[] _menuData = Array.Empty<MenuDataItem>();
 
-
-    protected override async Task OnInitializedAsync()
+    public partial class BasicLayout
     {
-        await base.OnInitializedAsync();
 
-        var dashboardChildrens = new List<MenuDataItem>
-        {
-            new MenuDataItem() { Path = "/", Name = "Scores", Key = "dashboard.scores" },
-            new MenuDataItem()
-                { Path = "/dashboard/alerts", Name = "Alerts", Key = "dashboard.alerts", Icon = "alert" },
-        };
+        private MenuDataItem[] _menuData = Array.Empty<MenuDataItem>();
 
-        var menu = new List<MenuDataItem>
+        protected override async Task OnInitializedAsync()
         {
-            new MenuDataItem()
+            await base.OnInitializedAsync();
+
+            var dashboardChildrens = new List<MenuDataItem>
             {
-                Path = "/dashboard", Name = "Dashboard", Icon = "dashboard", Key = "dashboard",
-                Children = dashboardChildrens.ToArray()
-            }
-        };
-        
-        _menuData = menu.ToArray();
+                new MenuDataItem() { Path = "/", Name = "Scores", Key = "dashboard.scores" },
+                new MenuDataItem()
+                    { Path = "/dashboard/alerts", Name = "Alerts", Key = "dashboard.alerts", Icon = "alert" },
+            };
+
+            var menu = new List<MenuDataItem>
+            {
+                new MenuDataItem()
+                {
+                    Path = "/dashboard", Name = "Dashboard", Icon = "dashboard", Key = "dashboard",
+                    Children = dashboardChildrens.ToArray()
+                }
+            };
+
+            _menuData = menu.ToArray();
+        }
+
     }
-   
 }
