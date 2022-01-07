@@ -1,35 +1,48 @@
 using AntDesign.ProLayout;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using ShowcaseClient;
+using ShowcaseClient.BFF;
 using ShowcaseClient.Data;
 using ShowcaseClient.Services;
 
-
-const string _onePassClientName = "OnePass.Client";
-
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.Logging.AddConfiguration(builder.Configuration.GetSection("Logging"));
-var onePassUri = builder.Configuration["OnePassUri"]!;
 var bffUri = builder.Configuration["BffUri"]!;
-//builder.RootComponents.RegisterAsCustomElement<App>("blazor-app");
-builder.RootComponents.Add<App>("#app");
+builder.RootComponents.RegisterAsCustomElement<App>("blazor-app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
 
+// authentication state and authorization
+builder.Services.AddAuthorizationCore();
+builder.Services.AddScoped<AuthenticationStateProvider, BffAuthenticationStateProvider>();
+
 // Supply HttpClient instances that include access tokens when making requests to the server project
-builder.Services
-    .AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient(_onePassClientName))
-    .AddHttpClient(_onePassClientName, client => client.BaseAddress = new Uri(onePassUri))
-    .AddHttpMessageHandler<AuthorizationMessageHandler>();
+builder.Services.AddTransient<AntiforgeryHandler>();
+
+//builder.Services
+//    .AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient(_onePassClientName))
+//    .AddHttpClient(_onePassClientName, client => client.BaseAddress = new Uri(onePassUri))
+//    .AddHttpMessageHandler<AuthorizationMessageHandler>();
+
+
+
+
+builder.Services.AddHttpClient("backend", client => client.BaseAddress = new Uri(bffUri))
+    .AddHttpMessageHandler<AntiforgeryHandler>();
+builder.Services.AddTransient(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("backend"));
+
+
+
 
 // gRPC-Web client with auth
 builder.Services.AddShowcaseClientDataClient((services, options) =>
 {
-    var authEnabledHandler = services.GetRequiredService<AuthorizationMessageHandler>();
-    authEnabledHandler.ConfigureHandler(new[] { bffUri });
-    authEnabledHandler.InnerHandler = new HttpClientHandler();
+    var authEnabledHandler = services.GetRequiredService<AntiforgeryHandler>();
+    //authEnabledHandler.ConfigureHandler(new[] { bffUri });
+    //authEnabledHandler.InnerHandler = new HttpClientHandler();
 
     options.BaseUri = bffUri;
     options.MessageHandler = authEnabledHandler;

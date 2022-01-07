@@ -1,87 +1,80 @@
 ﻿@page "/"
 
+@inject DataSynchronizer _dataSynchronizer
+@using BlazorShowcase.Data
+@implements IDisposable
+
 <div>
-    <PageContainer Title="Scores">
-        <Breadcrumb>
-            <Breadcrumb>
-                <BreadcrumbItem>Home</BreadcrumbItem>
-                <BreadcrumbItem>Dashboard</BreadcrumbItem>
-                <BreadcrumbItem>Scores </BreadcrumbItem>
-            </Breadcrumb>
-        </Breadcrumb>
-        <ChildContent>
-            <div class="standardList">
-                <Card>
-                    <Row Gutter="24">
-                        <AntDesign.Col Sm="8" Xs="24">
-                            @Info("Total scores for last 24 hours", "XXXX", true)
-                        </AntDesign.Col>
-                        <AntDesign.Col Sm="8" Xs="24">
-                            @Info("Scores over risk 750", "YYYY", true)
-                        </AntDesign.Col>
-                        <AntDesign.Col Sm="8" Xs="24">
-                            @Info("Investigated (last 24 hours)", "ZZZZ")
-                        </AntDesign.Col>
-                    </Row>
-                </Card>
+    <AuthorizeView>
+        <Authorized Context="auth">
+            <SyncStatus />
 
-                <Card Class="listCard"
-                      Title="Scores"
-                      Style="margin-top: 24px;"
-                      BodyStyle="padding: 0 32px 40px 32px">
-                    @*
-                    <Extra>
-                        <div class="extraContent">
-                            <RadioGroup @bind-Value="_model.Status">
-                                <Radio RadioButton Value="@("all")">All</Radio>
-                                <Radio RadioButton Value="@("progress")">Processing</Radio>
-                                <Radio RadioButton Value="@("waiting")">Waiting</Radio>
-                            </RadioGroup>
-                            <Search Class="extraContentSearch" Placeholder="Please Enter" @bind-Value="_model.SearchKeyword" />
-                        </div>
-                    </Extra>
-                    <ChildContent>
-                        <Button Type="dashed"
-                                Style="width: 100%; margin-bottom: 8px;"
-                                OnClick="ShowModal">
-                            <Icon Type="plus" Theme="outline" />
-                            Add
-                        </Button>
+            <PageContainer Title="Scores">
+                <Breadcrumb>
+                    <Breadcrumb>
+                        <BreadcrumbItem>Home</BreadcrumbItem>
+                        <BreadcrumbItem>Dashboard</BreadcrumbItem>
+                        <BreadcrumbItem>Scores </BreadcrumbItem>
+                    </Breadcrumb>
+                </Breadcrumb>
+                <ChildContent>
+                    <div class="standardList">
+                        <Card>
+                            <Row Gutter="24">
+                                <AntDesign.Col Sm="8" Xs="24">
+                                    @Info("Total scores for last 24 hours", "XXXX", true)
+                                </AntDesign.Col>
+                                <AntDesign.Col Sm="8" Xs="24">
+                                    @Info("Scores over risk 750", "YYYY", true)
+                                </AntDesign.Col>
+                                <AntDesign.Col Sm="8" Xs="24">
+                                    @Info("Investigated (last 24 hours)", "ZZZZ")
+                                </AntDesign.Col>
+                            </Row>
+                        </Card>
 
-                        <AntList TItem="ListItemDataType"
-                                 DataSource="_data"
-                                 ItemLayout="ListItemLayout.Horizontal">
-                            <ListItem Actions="_actions">
-                                <ListItemMeta Avatar="@context.Avatar" Description="@context.SubDescription">
-                                    <TitleTemplate>
-                                        <a href="@context.Href">@context.Title</a>
-                                    </TitleTemplate>
-                                </ListItemMeta>
-                                <div class="listContent">
-                                    <div class="listContentItem">
-                                        <span>Owner</span>
-                                        <p>@context.Owner</p>
-                                    </div>
-                                    <div class="listContentItem">
-                                        <span>Starting time</span>
-                                        <p>@context.CreatedAt.ToString("yyyy-MM-dd HH:mm")</p>
-                                    </div>
-                                    <div class="listContentItem">
-                                        <AntDesign.Progress Percent="@context.Percent"
-                                                            Status="@_pStatus[context.Status]"
-                                                            StrokeWidth="6"
-                                                            Style="width: 180px;" />
-                                    </div>
-                                </div>
-                            </ListItem>
-                        </AntList>
-                    </ChildContent>
-                *@
-                    <ChildContent>
-                        BRUH DOH
-                    </ChildContent>
-                </Card>
-            </div>
-        </ChildContent>
-    </PageContainer>
+                        <Card Class="listCard"
+                              Title="Scores"
+                              Style="margin-top: 24px;"
+                              BodyStyle="padding: 0 32px 40px 32px">
+                            <ChildContent>
+
+                                @if (db is not null)
+                                {
+
+                                    <Table @ref="table"
+                                       TItem="Score"
+                                       DataSource="@GetFilteredScores()"
+                                       Total="_total"
+                                       PageIndex="0"
+                                       PageSize="50"
+                                       
+                                       >
+                                       
+
+                                        @*
+                                            @bind-SelectedRows="selectedRows"
+                                            OnChange="OnChange"
+                                        *@
+
+                                        <Column @bind-Field="@context.Id" Sortable />
+                                        <Column @bind-Field="@context.CreatedOn" Format="yyyy-MM-dd" Sortable />
+                                        <Column @bind-Field="@context.UserName" Sortable />
+                                        <Column @bind-Field="@context.FullName" Sortable />
+                                        <Column @bind-Field="@context.IpAddress" Sortable />
+                                        <Column @bind-Field="@context.City" Sortable />
+                                        <Column @bind-Field="@context.RiskScore" Sortable />
+                                    </Table>
+                                }
+
+
+                            </ChildContent>
+                        </Card>
+                    </div>
+                </ChildContent>
+            </PageContainer>
+
+        </Authorized>
+    </AuthorizeView>
+
 </div>

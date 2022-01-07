@@ -8,7 +8,7 @@ namespace Shared
 
         public List<Score> GenerateFakeScores(int count)
         {
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 100; i++)
             {
                 _streamIds.Add(Guid.NewGuid().ToString());
             }

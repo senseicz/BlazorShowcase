@@ -13,6 +13,40 @@
         {
             services.AddControllers();
             services.AddGrpc();
+            services.AddBff();
+
+            services.AddAuthentication(options =>
+                {
+                    options.DefaultScheme = "cookie";
+                    options.DefaultChallengeScheme = "oidc";
+                    options.DefaultSignOutScheme = "oidc";
+                })
+                .AddCookie("cookie", options =>
+                {
+                    options.Cookie.Name = "__Host-blazor";
+                    options.Cookie.SameSite = SameSiteMode.Strict;
+                })
+                .AddOpenIdConnect("oidc", options =>
+                {
+                    options.Authority = "https://authcolleague-absaaccess-uat.intra.absaafrica";
+
+                    // confidential client using code flow + PKCE
+                    options.ClientId = "blazor-showcase-tonda";
+                    options.ClientSecret = "wG:~5Fv3z6M+YvE$";
+                    options.ResponseType = "code";
+                    options.ResponseMode = "query";
+
+                    options.MapInboundClaims = false;
+                    options.GetClaimsFromUserInfoEndpoint = true;
+                    options.SaveTokens = true;
+
+                    // request scopes + refresh tokens
+                    options.Scope.Clear();
+                    options.Scope.Add("openid");
+                    options.Scope.Add("profile");
+                    options.Scope.Add("apiapi");
+                    options.Scope.Add("offline_access");
+                });
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -24,15 +58,22 @@
 
             app.UseHttpsRedirection();
 
-            app.UseRouting();
+            app.UseBlazorFrameworkFiles();
+            app.UseStaticFiles();
 
+            app.UseRouting();
+            app.UseAuthentication();
+            app.UseBff();
             app.UseAuthorization();
 
             app.UseGrpcWeb();
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllers();
+                endpoints.MapControllers()
+                    .RequireAuthorization()
+                    .AsBffApiEndpoint();
+
                 endpoints.MapGet("/",
                     async context =>
                     {

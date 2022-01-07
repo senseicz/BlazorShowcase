@@ -19,9 +19,13 @@
 		<PackageReference Include="Amazon.Lambda.RuntimeSupport" Version="1.4.0" />
 		<PackageReference Include="Amazon.Lambda.Core" Version="2.1.0" />
 		<PackageReference Include="Amazon.Lambda.Serialization.SystemTextJson" Version="2.2.0" />
+		<PackageReference Include="Duende.BFF" Version="1.1.2" />
 		<PackageReference Include="Grpc.AspNetCore" Version="2.40.0" />
 		<PackageReference Include="Grpc.AspNetCore.Web" Version="2.40.0" />
 		<ProjectReference Include="..\Shared\Shared.csproj" />
+		
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="6.0.1" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="6.0.1" />
 
 		<Protobuf Include="..\Shared\protobuf.proto" GrpcServices="Server" />
 	</ItemGroup>
