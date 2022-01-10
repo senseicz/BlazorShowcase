@@ -1,6 +1,8 @@
 ﻿using AntDesign;
 using AntDesign.ProLayout;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
+using ShowcaseClient.BFF;
 using ShowcaseClient.Models;
 using ShowcaseClient.Services;
 
@@ -14,31 +16,13 @@ namespace ShowcaseClient.Components
         private NoticeIconData[] _events = { };
         private int _count = 0;
 
-        private List<AutoCompleteDataItem<string>> DefaultOptions { get; set; } = new List<AutoCompleteDataItem<string>>
-        {
-            new AutoCompleteDataItem<string>
-            {
-                Label = "umi ui",
-                Value = "umi ui"
-            },
-            new AutoCompleteDataItem<string>
-            {
-                Label = "Pro Table",
-                Value = "Pro Table"
-            },
-            new AutoCompleteDataItem<string>
-            {
-                Label = "Pro Layout",
-                Value = "Pro Layout"
-            }
-        };
+        private string FullUserName = "";
 
         public AvatarMenuItem[] AvatarMenuItems { get; set; } = new AvatarMenuItem[]
         {
-            new() { Key = "center", IconType = "user", Option = "个人中心"},
-            new() { Key = "setting", IconType = "setting", Option = "个人设置"},
+            new() { Key = "setting", IconType = "setting", Option = "Settings"},
             new() { IsDivider = true },
-            new() { Key = "logout", IconType = "logout", Option = "退出登录"}
+            new() { Key = "logout", IconType = "logout", Option = "Logout"}
         };
 
         [Inject] protected NavigationManager NavigationManager { get; set; }
@@ -47,10 +31,25 @@ namespace ShowcaseClient.Components
         //[Inject] protected IProjectService ProjectService { get; set; }
         [Inject] protected MessageService MessageService { get; set; }
 
+        [Inject]
+        protected AuthenticationStateProvider AuthStateProvider { get; set; }
+
         protected override async Task OnInitializedAsync()
         {
             await base.OnInitializedAsync();
             SetClassMap();
+
+            var user = await AuthStateProvider.GetAuthenticationStateAsync();
+
+            if (user.User.Identity != null)
+            {
+                var givenNameClaim = user.User.FindFirst("given_name");
+                if (givenNameClaim != null)
+                {
+                    FullUserName = givenNameClaim.Value;
+                }
+            }
+
             _currentUser = await UserService.GetCurrentUserAsync();
             
             /*
@@ -73,22 +72,15 @@ namespace ShowcaseClient.Components
         {
             switch (item.Key)
             {
-                case "center":
-                    NavigationManager.NavigateTo("/account/center");
-                    break;
                 case "setting":
-                    NavigationManager.NavigateTo("/account/settings");
+                    NavigationManager.NavigateTo("/");
                     break;
                 case "logout":
                     NavigationManager.NavigateTo("/user/login");
                     break;
             }
         }
-
-        public void HandleSelectLang(MenuItem item)
-        {
-        }
-
+        
         public async Task HandleClear(string key)
         {
             switch (key)
@@ -104,11 +96,6 @@ namespace ShowcaseClient.Components
                     break;
             }
             await MessageService.Success($"清空了{key}");
-        }
-
-        public async Task HandleViewMore(string key)
-        {
-            await MessageService.Info("Click on view more");
         }
     }
 }

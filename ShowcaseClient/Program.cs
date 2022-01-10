@@ -3,17 +3,31 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using Serilog;
+using Serilog.Core;
+using Serilog.Events;
 using ShowcaseClient;
 using ShowcaseClient.BFF;
 using ShowcaseClient.Data;
+using ShowcaseClient.Models;
 using ShowcaseClient.Services;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.Logging.AddConfiguration(builder.Configuration.GetSection("Logging"));
-var bffUri = builder.Configuration["BffUri"]!;
+
+var levelSwitch = new LoggingLevelSwitch(LogEventLevel.Debug);
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.ControlledBy(levelSwitch)
+    .WriteTo.BrowserConsole(outputTemplate: "[{Timestamp:HH:mm:ss} {Level}] {SourceContext}{NewLine}{Message:lj}{NewLine}{Exception}{NewLine}")
+    .CreateLogger();
+
+var options = new Options();
+builder.Configuration.Bind(options);
+builder.Services.AddSingleton(options);
+
+var bffUri = options.BffUri;
 builder.RootComponents.RegisterAsCustomElement<App>("blazor-app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
-
 
 // authentication state and authorization
 builder.Services.AddAuthorizationCore();
@@ -30,7 +44,7 @@ builder.Services.AddTransient<AntiforgeryHandler>();
 
 
 
-builder.Services.AddHttpClient("backend", client => client.BaseAddress = new Uri(bffUri))
+builder.Services.AddHttpClient("backend", client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress)) //bffUri
     .AddHttpMessageHandler<AntiforgeryHandler>();
 builder.Services.AddTransient(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("backend"));
 
@@ -41,20 +55,21 @@ builder.Services.AddTransient(sp => sp.GetRequiredService<IHttpClientFactory>().
 builder.Services.AddShowcaseClientDataClient((services, options) =>
 {
     var authEnabledHandler = services.GetRequiredService<AntiforgeryHandler>();
-    //authEnabledHandler.ConfigureHandler(new[] { bffUri });
-    //authEnabledHandler.InnerHandler = new HttpClientHandler();
+    authEnabledHandler.InnerHandler = new HttpClientHandler();
 
-    options.BaseUri = bffUri;
+    options.BaseUri = builder.HostEnvironment.BaseAddress;
     options.MessageHandler = authEnabledHandler;
 });
 
 // Supplies an IAuthorizationStateProvider service that lets other components know about auth state
 // This one gets that state by asking the OpenID Connect client. Also we cache the state for offline use.
-builder.Services.AddApiAuthorization(c =>
-{
-    c.ProviderOptions.ConfigurationEndpoint = $"{bffUri}/client-configuration/showcase-client";
-});
-builder.Services.AddScoped<AccountClaimsPrincipalFactory<RemoteUserAccount>, OfflineAccountClaimsPrincipalFactory>();
+//builder.Services.AddApiAuthorization(c =>
+//{
+//    c.ProviderOptions.ConfigurationEndpoint = $"{bffUri}/client-configuration/showcase-client";
+//});
+//builder.Services.AddScoped<AccountClaimsPrincipalFactory<RemoteUserAccount>, OfflineAccountClaimsPrincipalFactory>();
+
+
 
 // Sets up EF Core with Sqlite
 builder.Services.AddShowcaseDataDbContext();
@@ -64,8 +79,6 @@ builder.Services.Configure<ProSettings>(builder.Configuration.GetSection("ProSet
 
 builder.Services.AddScoped<IUserService, UserService>();
 
-
-builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 
 await builder.Build().RunAsync();
 

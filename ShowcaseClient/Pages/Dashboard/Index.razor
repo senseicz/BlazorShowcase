@@ -38,18 +38,24 @@
                               Style="margin-top: 24px;"
                               BodyStyle="padding: 0 32px 40px 32px">
                             <ChildContent>
+                                
+                                @*(db is not null)*@
 
-                                @if (db is not null)
+                                @*@if (scores != null && scores.Any())*@
+                                @if(db is not null)
                                 {
 
+                                    @**@
+                                    @*DataSource="scores"*@
+
+
                                     <Table @ref="table"
-                                       TItem="Score"
-                                       DataSource="@GetFilteredScores()"
-                                       Total="_total"
-                                       PageIndex="0"
-                                       PageSize="50"
-                                       
-                                       >
+                                           TItem="Score"
+                                           DataSource="@GetFilteredScores()"     
+                                           Total="_total"
+                                           PageIndex="0"
+                                           PageSize="_total"
+                                    >
                                        
 
                                         @*
@@ -75,6 +81,10 @@
             </PageContainer>
 
         </Authorized>
+        
+        <NotAuthorized>
+            <Empty></Empty>
+        </NotAuthorized>
     </AuthorizeView>
 
 </div>

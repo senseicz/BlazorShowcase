@@ -1,4 +1,7 @@
-﻿namespace BlazorShowcaseBackend
+﻿
+using Serilog;
+
+namespace BlazorShowcaseBackend
 {
     public class Startup
     {
@@ -12,6 +15,7 @@
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+            services.AddRazorPages();
             services.AddGrpc();
             services.AddBff();
 
@@ -44,16 +48,28 @@
                     options.Scope.Clear();
                     options.Scope.Add("openid");
                     options.Scope.Add("profile");
-                    options.Scope.Add("apiapi");
+                    //options.Scope.Add("apiapi");
                     options.Scope.Add("offline_access");
                 });
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.UseSerilogRequestLogging();
+
+            // Allow requests from the external ManufacturingHub and  MissionControl applications
+            app.UseCors(cors => cors.WithOrigins(
+                "https://localhost:7777"
+            ).AllowAnyMethod().AllowAnyHeader());
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                app.UseWebAssemblyDebugging();
+            }
+            else
+            {
+                app.UseExceptionHandler("/Error");
             }
 
             app.UseHttpsRedirection();
@@ -70,17 +86,16 @@
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapBffManagementEndpoints();
+                endpoints.MapRazorPages();
+
                 endpoints.MapControllers()
                     .RequireAuthorization()
                     .AsBffApiEndpoint();
 
-                endpoints.MapGet("/",
-                    async context =>
-                    {
-                        await context.Response.WriteAsync("Welcome to running ASP.NET Core on AWS Lambda");
-                    });
-
                 endpoints.MapGrpcService<ScoresDataService>().EnableGrpcWeb();
+
+                endpoints.MapFallbackToFile("index.html");
             });
         }
     }

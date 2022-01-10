@@ -12,8 +12,12 @@ public partial class Index
     ITable table;
     int _total = 0;
 
+    private List<Score> scores;
+
 
     [Parameter] public string? SearchName { get; set; }
+
+    [Inject] private ScoresData.ScoresDataClient _scoredDataClient { get; set; }
 
     string[] categories = Array.Empty<string>();
     string[] subcategories = Array.Empty<string>();
@@ -62,6 +66,10 @@ public partial class Index
         db = await _dataSynchronizer.GetPreparedDbContextAsync();
         _dataSynchronizer.OnUpdate += StateHasChanged;
         _total = _dataSynchronizer.SyncTotal;
+
+
+        //var data = await _scoredDataClient.GetScoresAsync(new ScoreRequest());
+        //scores = data.Scores.ToList();
     }
 
     protected override void OnParametersSet()

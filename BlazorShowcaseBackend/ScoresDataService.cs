@@ -1,9 +1,13 @@
 ﻿using BlazorShowcase.Data;
 using Grpc.Core;
+using Microsoft.AspNetCore.Authorization;
+using Newtonsoft.Json;
+using Serilog;
 using Shared;
 
 namespace BlazorShowcaseBackend
 {
+    [Authorize]
     public class ScoresDataService : ScoresData.ScoresDataBase
     {
         public ScoresDataService()
@@ -12,10 +16,27 @@ namespace BlazorShowcaseBackend
 
         public override async Task<ScoreResponse> GetScores(ScoreRequest request, ServerCallContext context)
         {
-            var scores = new FakeDataGenerator().GenerateFakeScores(100);
+            Log.Information("Request arrived, request {req}", JsonConvert.SerializeObject(request, Formatting.Indented));
+            
+            var response = new ScoreResponse { Count = 0 };
 
-            var response = new ScoreResponse { Count = scores.Count };
-            response.Scores.AddRange(scores.Select(MapToTransferObject));
+            if (request.TotalRequested > request.Downloaded)
+            {
+                var scoresToGenerate = request.TotalRequested - request.Downloaded;
+
+                if (scoresToGenerate > 100)
+                {
+                    scoresToGenerate = 100;
+                }
+
+                var scores = new FakeDataGenerator().GenerateFakeScores(scoresToGenerate);
+
+                response.Count = scoresToGenerate;
+                response.Scores.AddRange(scores.Select(MapToTransferObject));
+            }
+
+
+            Log.Information("{count} Scores sent away ({forSure})", response.Count, response.Scores.Count);
 
             return response;
         }

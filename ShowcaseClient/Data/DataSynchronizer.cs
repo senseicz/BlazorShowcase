@@ -15,11 +15,23 @@ class DataSynchronizer
     private readonly ScoresData.ScoresDataClient scoresData;
     private bool isSynchronizing;
 
-    public DataSynchronizer(IJSRuntime js, IDbContextFactory<ClientSideDbContext> dbContextFactory, ScoresData.ScoresDataClient scoresData)
+    private readonly int _totalScoresToDownload = 500;
+    private int _scoresDownloaded = 0;
+
+    private readonly ILogger<DataSynchronizer> _logger;
+
+
+    public DataSynchronizer(IJSRuntime js, 
+        IDbContextFactory<ClientSideDbContext> dbContextFactory, 
+        ScoresData.ScoresDataClient scoresData,
+        ILogger<DataSynchronizer> logger)
     {
+        _logger = logger;
+
         this.dbContextFactory = dbContextFactory;
         this.scoresData = scoresData;
         firstTimeSetupTask = FirstTimeSetupAsync(js);
+        
     }
 
     public int SyncCompleted { get; private set; }
@@ -41,6 +53,7 @@ class DataSynchronizer
 
     private async Task FirstTimeSetupAsync(IJSRuntime js)
     {
+        _logger.LogInformation("[{now}] FirstTimeSetupTask start.", DateTime.Now);
         var module = await js.InvokeAsync<IJSObjectReference>("import", "./dbstorage.js");
 
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Create("browser")))
@@ -50,6 +63,8 @@ class DataSynchronizer
 
         using var db = await dbContextFactory.CreateDbContextAsync();
         await db.Database.EnsureCreatedAsync();
+
+        _logger.LogInformation("[{now}] FirstTimeSetupTask finish.", DateTime.Now);
     }
 
     private async Task EnsureSynchronizingAsync()
@@ -57,6 +72,7 @@ class DataSynchronizer
         // Don't run multiple syncs in parallel. This simple logic is adequate because of single-threadedness.
         if (isSynchronizing)
         {
+            _logger.LogInformation("[{now}] IsSyncing: TRUE", DateTime.Now);
             return;
         }
 
@@ -64,7 +80,7 @@ class DataSynchronizer
         {
             isSynchronizing = true;
             SyncCompleted = 0;
-            SyncTotal = 0;
+            SyncTotal = _totalScoresToDownload;
 
             // Get a DB context
             using var db = await GetPreparedDbContextAsync();
@@ -72,38 +88,53 @@ class DataSynchronizer
             db.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
 
             // Begin fetching any updates to the dataset from the backend server
-            var mostRecentUpdate = db.Scores.OrderByDescending(p => p.CreatedOn).FirstOrDefault()?.CreatedOn;
+            //var mostRecentUpdate = db.Scores.OrderByDescending(p => p.CreatedOn).FirstOrDefault()?.CreatedOn;
 
             var connection = db.Database.GetDbConnection();
             connection.Open();
 
+            _logger.LogInformation("[{now}] Sending FIRST GetScores request.", DateTime.Now);
 
-            var request = new ScoreRequest { /*MaxCount = 5000, ModifiedSinceTicks = mostRecentUpdate ?? -1 */};
+            var request = new ScoreRequest {TotalRequested = _totalScoresToDownload, Downloaded = _scoresDownloaded};
             var response = await scoresData.GetScoresAsync(request);
 
+            _logger.LogInformation("[{now}] Response received, start with bulk insert.", DateTime.Now);
+
             BulkInsert(connection, response.Scores);
-            OnUpdate?.Invoke();
+            //OnUpdate?.Invoke();
+
+            _scoresDownloaded = response.Count;
+
+            _logger.LogInformation("[{now}] Bulk update finish.", DateTime.Now);
+
+            var counter = 1;
+
+            while (true)
+            {
+                counter++;
+
+                _logger.LogInformation("[{now}] Sending GetScores request number {reqNumber}", DateTime.Now, counter);
+
+                request = new ScoreRequest { TotalRequested = _totalScoresToDownload, Downloaded = _scoresDownloaded };
+                response = await scoresData.GetScoresAsync(request);
+
+                _logger.LogInformation("[{now}] Response of request no: {reqNo} received, start with bulk insert.", DateTime.Now, counter);
 
 
-            //while (true)
-            //{
-            //    var request = new ScoreRequest { /*MaxCount = 5000, ModifiedSinceTicks = mostRecentUpdate ?? -1 */};
-            //    var response = await scoresData.GetScoresAsync(request);
-            //    var syncRemaining = response.ModifiedCount - response.Parts.Count;
-            //    SyncCompleted += response.Parts.Count;
-            //    SyncTotal = SyncCompleted + syncRemaining;
+                _scoresDownloaded += response.Count;
+                SyncCompleted = _scoresDownloaded;
 
-            //    if (response.Parts.Count == 0)
-            //    {
-            //        break;
-            //    }
-            //    else
-            //    {
-            //        mostRecentUpdate = response.Parts.Last().ModifiedTicks;
-            //        BulkInsert(connection, response.Parts);
-            //        OnUpdate?.Invoke();
-            //    }
-            //}
+                if (response.Count == 0)
+                {
+                    break;
+                }
+                else
+                {
+                    //mostRecentUpdate = response.Parts.Last().ModifiedTicks;
+                    BulkInsert(connection, response.Scores);
+                    //OnUpdate?.Invoke();
+                }
+            }
         }
         catch (Exception ex)
         {
@@ -114,16 +145,22 @@ class DataSynchronizer
         {
             isSynchronizing = false;
         }
+
+        OnUpdate?.Invoke();
+
     }
 
     private void BulkInsert(DbConnection connection, IEnumerable<Score> scores)
     {
+        _logger.LogInformation("[{now}] Inserting {count} Scores - START",  DateTime.Now, scores.Count());
+
+
         // Since we're inserting so much data, we can save a huge amount of time by dropping down below EF Core and
         // using the fastest bulk insertion technique for Sqlite.
         using (var transaction = connection.BeginTransaction())
         {
             var command = connection.CreateCommand();
-            var id = AddNamedParameter(command, "Id");
+            var id = AddNamedParameter(command, "$Id");
             var streamId = AddNamedParameter(command, "$StreamId");
             var createdOn = AddNamedParameter(command, "$CreatedOn");
             var userName = AddNamedParameter(command, "$UserName");
@@ -133,7 +170,7 @@ class DataSynchronizer
             var riskScore = AddNamedParameter(command, "$RiskScore");
 
             command.CommandText =
-                $"INSERT OR REPLACE INTO Parts (Id, StreamId, CreatedOn, UserName, FullName, IpAddress, City, RiskScore) " +
+                $"INSERT OR REPLACE INTO Scores (Id, StreamId, CreatedOn, UserName, FullName, IpAddress, City, RiskScore) " +
                 $"VALUES ({id.ParameterName}, {streamId.ParameterName}, {createdOn.ParameterName}, {userName.ParameterName}, {fullName.ParameterName}, {ipAddress.ParameterName}, {city.ParameterName}, {riskScore.ParameterName})";
 
             foreach (var score in scores)
@@ -150,6 +187,8 @@ class DataSynchronizer
             }
 
             transaction.Commit();
+
+            _logger.LogInformation("[{now}] Scores inserted - STOP", DateTime.Now);
         }
 
         static DbParameter AddNamedParameter(DbCommand command, string name)
