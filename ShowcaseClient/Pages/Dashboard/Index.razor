@@ -1,0 +1,108 @@
+﻿@page "/"
+
+@inject DataSynchronizer _dataSynchronizer
+@implements IDisposable
+
+<div>
+    <AuthorizeView>
+        <Authorized Context="auth">
+            <SyncStatus />
+
+            <PageContainer Title="Scores">
+                <Breadcrumb>
+                    <Breadcrumb>
+                        <BreadcrumbItem>Home</BreadcrumbItem>
+                        <BreadcrumbItem>Dashboard</BreadcrumbItem>
+                        <BreadcrumbItem>Scores </BreadcrumbItem>
+                    </Breadcrumb>
+                </Breadcrumb>
+                <ChildContent>
+                    <div class="standardList">
+                        <Card>
+                            <Row Gutter="24">
+                                <AntDesign.Col Sm="8" Xs="24">
+                                    @Info("Total number of scores synced", _total.ToString(), true)
+                                </AntDesign.Col>
+                                
+                                <AntDesign.Col Sm="8" Xs="24">
+                                    @Info("Scores over risk 750", _totalOver750.ToString(), true)
+                                </AntDesign.Col>
+                                
+                                <AntDesign.Col Sm="8" Xs="24">
+                                    @Info("Total scores in local database", _totalInLocalDb.ToString(), true)
+                                </AntDesign.Col>
+                            </Row>
+                        </Card>
+
+                        <Card Class="listCard"
+                              Title="Scores"
+                              Style="margin-top: 24px;"
+                              BodyStyle="padding: 0 32px 40px 32px">
+                            <ChildContent>
+
+                                @if (db is not null)
+                                {
+                                    <div class="score-grid">
+                                        <Grid Virtualize="true" Items="@GetFilteredScores()" ItemKey="@(x => x.Id)" ItemSize="35">
+
+                                            <PropertyColumn Title="Id" Property="@(x => x.Id)" Align="Align.Left" Class="col-category" />
+                                            
+                                            <PropertyColumn Title="Created" Property="@(x => x.CreatedOnDateTime)" Format="d.M.yyyy HH:mm" Align="Align.Left" Class="col-location" />
+                                            
+                                            <PropertyColumn Title="UserName" Property="@(x => x.UserName)" Class="col-name">
+                                                <ColumnOptions>
+                                                    <input @bind="searchUserName" @bind:event="oninput" type="search" placeholder="Search..." />
+                                                </ColumnOptions>
+                                            </PropertyColumn>
+                                            
+                                            <PropertyColumn Title="Full Name" Property="@(x => x.FullName)" Class="col-name" >
+                                                <ColumnOptions>
+                                                    <input @bind="searchFullName" @bind:event="oninput" type="search" placeholder="Search..." />
+                                                </ColumnOptions>
+                                            </PropertyColumn>
+                                            
+                                            <PropertyColumn Title="IP Address" Property="@(x => x.IpAddress)" Align="Align.Left" Class="col-location" />
+                                            
+                                            <PropertyColumn Title="City" Property="@(x => x.City)" Align="Align.Left" Class="col-location"/>
+                                            
+                                            <TemplateColumn Title="Risk Score" Align="Align.Right" Class="col-risk-score">
+                                                <ChildContent>
+                                                    <ShowcaseClient.Components.ScoreProgressBar Score="@context.RiskScore" WidthInPixels="200" />
+                                                </ChildContent>
+                                                
+                                                <ColumnOptions>
+                                                    <p>Min score</p>
+                                                    <input type="range" @bind="minScore" @bind:event="oninput" min="0" max="1000" />
+                                                    <p>Max score</p>
+                                                    <input type="range" @bind="maxScore" @bind:event="oninput" min="0" max="1000" />
+                                                </ColumnOptions>
+                                                
+                                            </TemplateColumn>
+                                        </Grid>
+                                    </div>
+                                }
+
+                            </ChildContent>
+                        </Card>
+                    </div>
+                </ChildContent>
+            </PageContainer>
+
+        </Authorized>
+
+        <NotAuthorized>
+            <PageContainer Title="Not authorized">
+                <ChildContent>
+                    <Card Title="Not authorized" Style="margin-top: 24px;" BodyStyle="padding: 0 32px 40px 32px">
+                        <ChildContent>
+                            <h1>
+                                Please log in to see any data here.
+                            </h1>
+                        </ChildContent>
+                    </Card>
+                </ChildContent>
+            </PageContainer>
+        </NotAuthorized>
+    </AuthorizeView>
+
+</div>

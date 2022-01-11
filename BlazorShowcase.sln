@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ShowcaseClient", "ShowcaseC
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shared", "Shared\Shared.csproj", "{F7D5756D-D041-4915-A5F6-9C3CA2757643}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QuickGrid", "QuickGrid\QuickGrid.csproj", "{1A0AAE8B-058E-4ED4-80CC-2786B45651D7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{F7D5756D-D041-4915-A5F6-9C3CA2757643}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F7D5756D-D041-4915-A5F6-9C3CA2757643}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F7D5756D-D041-4915-A5F6-9C3CA2757643}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1A0AAE8B-058E-4ED4-80CC-2786B45651D7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1A0AAE8B-058E-4ED4-80CC-2786B45651D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1A0AAE8B-058E-4ED4-80CC-2786B45651D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1A0AAE8B-058E-4ED4-80CC-2786B45651D7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

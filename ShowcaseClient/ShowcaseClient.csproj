@@ -7,25 +7,29 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.0" />
-        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="6.0.0" PrivateAssets="all" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.1" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="6.0.1" PrivateAssets="all" />
         <PackageReference Include="Microsoft.AspNetCore.Components.CustomElements" Version="0.1.0-alpha.21466.1" />
-        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="6.0.0" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="6.0.1" />
         <PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" />
         <PackageReference Include="Microsoft.Extensions.Logging.Configuration" Version="6.0.0" />
+        <PackageReference Include="AntDesign.ProLayout" Version="0.1.10" />
 
-        <!-- gRPC -->
+        <PackageReference Include="Serilog.Sinks.BrowserConsole" Version="1.0.0" />
+
+
+		<!-- gRPC -->
         <PackageReference Include="Google.Protobuf" Version="3.18.1" />
-        <PackageReference Include="Grpc.Net.Client" Version="2.40.0" />
-        <PackageReference Include="Grpc.Net.Client.Web" Version="2.40.0" />
-        <PackageReference Include="Grpc.Tools" Version="2.41.0">
+        <PackageReference Include="Grpc.Net.Client" Version="2.41.0" />
+        <PackageReference Include="Grpc.Net.Client.Web" Version="2.41.0" />
+        <PackageReference Include="Grpc.Tools" Version="2.43.0">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <Protobuf Include="..\Shared\protobuf.proto" GrpcServices="Client" />
         
         
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.0" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.1" />
         <NativeFileReference Include="Data\e_sqlite3.o" />
         
         
@@ -34,6 +38,14 @@
     <ItemGroup>
         <ServiceWorker Include="wwwroot\service-worker.js" PublishedContent="wwwroot\service-worker.published.js" />
         <None Remove="Directory.build.*" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Components\GlobalHeader" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\QuickGrid\QuickGrid.csproj" />
     </ItemGroup>
 
 </Project>

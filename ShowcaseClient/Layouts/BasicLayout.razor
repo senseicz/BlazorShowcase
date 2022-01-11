@@ -1,0 +1,17 @@
+﻿@namespace ShowcaseClient.Layouts
+@inherits LayoutComponentBase
+
+<AntDesign.ProLayout.BasicLayout 
+    Logo="@("./absa.svg")"
+    MenuData="_menuData">
+    <RightContentRender>
+        <ShowcaseClient.Components.RightContent />
+    </RightContentRender>
+    <ChildContent>
+        @Body
+    </ChildContent>
+    <FooterRender>
+        @*<FooterView Copyright="2021 Ant Design Blazor" Links="Links"></FooterView>*@
+    </FooterRender>
+</AntDesign.ProLayout.BasicLayout>
+<SettingDrawer />

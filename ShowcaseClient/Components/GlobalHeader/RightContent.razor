@@ -1,0 +1,34 @@
+﻿@namespace ShowcaseClient.Components
+@using ShowcaseClient.Models
+@inherits AntDesign.AntDomComponentBase
+
+<Space Class="@ClassMapper.Class" Size="@("24")">
+    
+    <SpaceItem>
+    
+        <AuthorizeView>
+            <Authorized Context="authUser">
+                
+                @{
+                    var showUsername = _currentUser.Name;
+                    if (!string.IsNullOrEmpty(_currentUser.PreferredUsername))
+                    {
+                        showUsername = $"{showUsername} ({_currentUser.PreferredUsername})";
+                    }
+                }
+                
+                <AvatarDropdown Name="@showUsername"
+                                Avatar="@_currentUser.Avatar"
+                                MenuItems="@AvatarMenuItems"
+                                OnItemSelected="HandleSelectUser"
+                                                
+                                />
+            </Authorized> 
+            <NotAuthorized>
+                <a href="bff/login">Log in</a>
+            </NotAuthorized>
+
+        </AuthorizeView>
+        
+    </SpaceItem>
+</Space>

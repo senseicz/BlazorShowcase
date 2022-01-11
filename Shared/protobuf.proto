@@ -6,7 +6,10 @@ service ScoresData {
 	rpc GetScores(ScoreRequest) returns (ScoreResponse);
 }
 
-message ScoreRequest {}
+message ScoreRequest {
+    int32 totalRequested = 1;
+    int32 downloaded = 2;
+}
 
 message ScoreResponse {
     repeated Score scores = 1;
