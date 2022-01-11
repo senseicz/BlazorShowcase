@@ -29,6 +29,9 @@ public class CurrentUser
     public GeographicType Geographic { get; set; }
     public string Address { get; set; }
     public string Phone { get; set; }
+
+    public string LogoutUri { get; set; }
+    public string PreferredUsername { get; set; }
 }
 
 public class UserLiteItem

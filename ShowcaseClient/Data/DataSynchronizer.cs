@@ -78,20 +78,32 @@ class DataSynchronizer
 
         try
         {
+            _logger.LogInformation("[{now}] Synchronization START", DateTime.Now);
+
+
             isSynchronizing = true;
             SyncCompleted = 0;
             SyncTotal = _totalScoresToDownload;
 
             // Get a DB context
+
+            _logger.LogInformation("[{now}] Before GetPreparedDbContextAsync()", DateTime.Now);
+
             using var db = await GetPreparedDbContextAsync();
             db.ChangeTracker.AutoDetectChangesEnabled = false;
             db.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
 
+            _logger.LogInformation("[{now}] After GetPreparedDbContextAsync()", DateTime.Now);
+
             // Begin fetching any updates to the dataset from the backend server
             //var mostRecentUpdate = db.Scores.OrderByDescending(p => p.CreatedOn).FirstOrDefault()?.CreatedOn;
 
+            _logger.LogInformation("[{now}] Before GetDbConnection()", DateTime.Now);
+
             var connection = db.Database.GetDbConnection();
             connection.Open();
+
+            _logger.LogInformation("[{now}] DB Connection is open now.", DateTime.Now);
 
             _logger.LogInformation("[{now}] Sending FIRST GetScores request.", DateTime.Now);
 
@@ -101,7 +113,7 @@ class DataSynchronizer
             _logger.LogInformation("[{now}] Response received, start with bulk insert.", DateTime.Now);
 
             BulkInsert(connection, response.Scores);
-            //OnUpdate?.Invoke();
+            OnUpdate?.Invoke();
 
             _scoresDownloaded = response.Count;
 
@@ -113,12 +125,12 @@ class DataSynchronizer
             {
                 counter++;
 
-                _logger.LogInformation("[{now}] Sending GetScores request number {reqNumber}", DateTime.Now, counter);
+                //_logger.LogInformation("[{now}] Sending GetScores request number {reqNumber}", DateTime.Now, counter);
 
                 request = new ScoreRequest { TotalRequested = _totalScoresToDownload, Downloaded = _scoresDownloaded };
                 response = await scoresData.GetScoresAsync(request);
 
-                _logger.LogInformation("[{now}] Response of request no: {reqNo} received, start with bulk insert.", DateTime.Now, counter);
+                //_logger.LogInformation("[{now}] Response of request no: {reqNo} received, start with bulk insert.", DateTime.Now, counter);
 
 
                 _scoresDownloaded += response.Count;
@@ -130,9 +142,12 @@ class DataSynchronizer
                 }
                 else
                 {
+                    //_logger.LogInformation("[{now}] Bulk insert of of request no: {reqNo} START.", DateTime.Now, counter);
                     //mostRecentUpdate = response.Parts.Last().ModifiedTicks;
                     BulkInsert(connection, response.Scores);
-                    //OnUpdate?.Invoke();
+                    OnUpdate?.Invoke();
+
+                    //_logger.LogInformation("[{now}] Bulk insert of of request no: {reqNo} STOP.", DateTime.Now, counter);
                 }
             }
         }
@@ -146,13 +161,15 @@ class DataSynchronizer
             isSynchronizing = false;
         }
 
+        _logger.LogInformation("[{now}] BEFORE OnUpdate.Invoke().", DateTime.Now);
         OnUpdate?.Invoke();
+        _logger.LogInformation("[{now}] AFTER OnUpdate.Invoke().", DateTime.Now);
 
     }
 
     private void BulkInsert(DbConnection connection, IEnumerable<Score> scores)
     {
-        _logger.LogInformation("[{now}] Inserting {count} Scores - START",  DateTime.Now, scores.Count());
+        //_logger.LogInformation("[{now}] Inserting {count} Scores - START",  DateTime.Now, scores.Count());
 
 
         // Since we're inserting so much data, we can save a huge amount of time by dropping down below EF Core and
@@ -188,7 +205,7 @@ class DataSynchronizer
 
             transaction.Commit();
 
-            _logger.LogInformation("[{now}] Scores inserted - STOP", DateTime.Now);
+            //_logger.LogInformation("[{now}] Scores inserted - STOP", DateTime.Now);
         }
 
         static DbParameter AddNamedParameter(DbCommand command, string name)

@@ -1,7 +1,6 @@
 ﻿@page "/"
 
 @inject DataSynchronizer _dataSynchronizer
-@using BlazorShowcase.Data
 @implements IDisposable
 
 <div>
@@ -38,31 +37,105 @@
                               Style="margin-top: 24px;"
                               BodyStyle="padding: 0 32px 40px 32px">
                             <ChildContent>
-                                
-                                @*(db is not null)*@
+
 
                                 @*@if (scores != null && scores.Any())*@
-                                @if(db is not null)
+                                @if (db is not null)
                                 {
+                                    <div class="score-grid">
+                                        <Grid Virtualize="true" Items="@GetFilteredScores()" ItemKey="@(x => x.Id)" ItemSize="35">
 
-                                    @**@
-                                    @*DataSource="scores"*@
+                                            <PropertyColumn Title="Id" Property="@(x => x.Id)" Align="Align.Left" Class="col-category" />
+                                            
+                                            <PropertyColumn Title="Created" Property="@(x => x.CreatedOnDateTime)" Format="d.M.yyyy HH:mm" Align="Align.Left" Class="col-location" />
+                                            
+                                            <PropertyColumn Title="UserName" Property="@(x => x.UserName)" Class="col-name">
+                                                <ColumnOptions>
+                                                    <input @bind="searchUserName" @bind:event="oninput" type="search" placeholder="Search..." />
+                                                </ColumnOptions>
+                                            </PropertyColumn>
+                                            
+                                            <PropertyColumn Title="Full Name" Property="@(x => x.FullName)" Class="col-name" >
+                                                <ColumnOptions>
+                                                    <input @bind="searchFullName" @bind:event="oninput" type="search" placeholder="Search..." />
+                                                </ColumnOptions>
+                                            </PropertyColumn>
+                                            
+                                            <PropertyColumn Title="IP Address" Property="@(x => x.IpAddress)" Align="Align.Left" Class="col-location" />
+                                            
+                                            <PropertyColumn Title="City" Property="@(x => x.City)" Align="Align.Left" Class="col-location"/>
+                                            
+                                            <TemplateColumn Title="Risk Score" Align="Align.Right" Class="col-risk-score">
+                                                <ChildContent>
+                                                    <ShowcaseClient.Components.ScoreProgressBar Score="@context.RiskScore" WidthInPixels="200" />
+                                                </ChildContent>
+                                                
+                                                <ColumnOptions>
+                                                    <p>Min score</p>
+                                                    <input type="range" @bind="minScore" @bind:event="oninput" min="0" max="1000" />
+                                                    <p>Max score</p>
+                                                    <input type="range" @bind="maxScore" @bind:event="oninput" min="0" max="1000" />
+                                                </ColumnOptions>
+                                                
+                                            </TemplateColumn>
+
+                                            @*
+
+                                                <TemplateColumn Title="Category" SortBy="@(items => items.SortByAscending(x => x.Category).ThenAscending(x => x.Subcategory))" Class="col-category">
+                                                <ChildContent>@context.Category / @context.Subcategory</ChildContent>
+                                                <ColumnOptions>
+                                                <p>Category (@categories.Length)</p>
+                                                <select multiple class="w-64 bg-gray-100 border-grey-500 border my-4" @bind="categories" @onclick="@(() => subcategories = Array.Empty<string>())">
+                                                @foreach (var name in db.Parts.Select(x => x.Category).Distinct())
+                                                {
+                                                <option>@name</option>
+                                                }
+                                                </select>
+
+                                                <p>Subcategory (@subcategories.Length)</p>
+                                                <select multiple class="w-64 bg-gray-100 border-grey-500 border my-4" @bind="subcategories">
+                                                @foreach (var name in db.Parts.Where(x => categories.Contains(x.Category)).Select(x => x.Subcategory).Distinct())
+                                                {
+                                                <option>@name</option>
+                                                }
+                                                </select>
+
+                                                <div><button class="bg-gray-200 px-5 py-1 mb-2" @onclick="@(() => { categories = Array.Empty<string>(); subcategories = Array.Empty<string>(); })">Reset</button></div>
+                                                </ColumnOptions>
+                                                </TemplateColumn>
+
+                                                <PropertyColumn Title="Name" Property="@(x => x.Name)" Class="col-name" OnCellClicked="@((Part part) => { selectedPart = part; })">
+                                                <ColumnOptions>
+                                                <input @bind="searchName" @bind:event="oninput" type="search" placeholder="Search..." />
+                                                </ColumnOptions>
+                                                </PropertyColumn>
+
+                                                <PropertyColumn Title="Location" Property="@(x => x.Location)" Class="col-location" />
+
+                                                <PropertyColumn Title="Stock" Property="@(x => x.Stock)" Format="N0" Align="Align.Right" Class="col-stock">
+                                                <ColumnOptions>
+                                                <p>Min stock</p>
+                                                <input type="range" @bind="minStock" @bind:event="oninput" min="0" max="50000" />
+                                                <p>Max stock</p>
+                                                <input type="range" @bind="maxStock" @bind:event="oninput" min="0" max="50000" />
+                                                </ColumnOptions>
+                                                </PropertyColumn>
+
+                                                <PropertyColumn Title="Cost ($)" Property="@(x => x.PriceCents/100)" Format="N0" Align="Align.Right" Class="col-cost" />
+                                            *@
+                                        </Grid>
+
+                                    </div>
 
 
-                                    <Table @ref="table"
-                                           TItem="Score"
-                                           DataSource="@GetFilteredScores()"     
-                                           Total="_total"
-                                           PageIndex="0"
-                                           PageSize="_total"
-                                    >
-                                       
-
-                                        @*
-                                            @bind-SelectedRows="selectedRows"
-                                            OnChange="OnChange"
-                                        *@
-
+                                    @*
+                                        <Table @ref="table"
+                                        TItem="Score"
+                                        DataSource="@GetFilteredScores()"
+                                        Total="_total"
+                                        PageIndex="0"
+                                        PageSize="_total"
+                                        >
                                         <Column @bind-Field="@context.Id" Sortable />
                                         <Column @bind-Field="@context.CreatedOn" Format="yyyy-MM-dd" Sortable />
                                         <Column @bind-Field="@context.UserName" Sortable />
@@ -70,7 +143,8 @@
                                         <Column @bind-Field="@context.IpAddress" Sortable />
                                         <Column @bind-Field="@context.City" Sortable />
                                         <Column @bind-Field="@context.RiskScore" Sortable />
-                                    </Table>
+                                        </Table>
+                                    *@
                                 }
 
 
@@ -81,9 +155,19 @@
             </PageContainer>
 
         </Authorized>
-        
+
         <NotAuthorized>
-            <Empty></Empty>
+            <PageContainer Title="Not authorized">
+                <ChildContent>
+                    <Card Title="Not authorized" Style="margin-top: 24px;" BodyStyle="padding: 0 32px 40px 32px">
+                        <ChildContent>
+                            <h1>
+                                Please log in to see any data here.
+                            </h1>
+                        </ChildContent>
+                    </Card>
+                </ChildContent>
+            </PageContainer>
         </NotAuthorized>
     </AuthorizeView>
 

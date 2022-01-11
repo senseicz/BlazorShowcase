@@ -28,27 +28,13 @@ namespace ShowcaseClient.Components
         [Inject] protected NavigationManager NavigationManager { get; set; }
 
         [Inject] protected IUserService UserService { get; set; }
-        //[Inject] protected IProjectService ProjectService { get; set; }
+        
         [Inject] protected MessageService MessageService { get; set; }
-
-        [Inject]
-        protected AuthenticationStateProvider AuthStateProvider { get; set; }
 
         protected override async Task OnInitializedAsync()
         {
             await base.OnInitializedAsync();
             SetClassMap();
-
-            var user = await AuthStateProvider.GetAuthenticationStateAsync();
-
-            if (user.User.Identity != null)
-            {
-                var givenNameClaim = user.User.FindFirst("given_name");
-                if (givenNameClaim != null)
-                {
-                    FullUserName = givenNameClaim.Value;
-                }
-            }
 
             _currentUser = await UserService.GetCurrentUserAsync();
             
@@ -76,7 +62,7 @@ namespace ShowcaseClient.Components
                     NavigationManager.NavigateTo("/");
                     break;
                 case "logout":
-                    NavigationManager.NavigateTo("/user/login");
+                    NavigationManager.NavigateTo(_currentUser.LogoutUri);
                     break;
             }
         }

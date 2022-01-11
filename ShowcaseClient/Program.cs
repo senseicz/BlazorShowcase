@@ -79,6 +79,7 @@ builder.Services.Configure<ProSettings>(builder.Configuration.GetSection("ProSet
 
 builder.Services.AddScoped<IUserService, UserService>();
 
+//builder.RootComponents.RegisterAsCustomElement<ShowcaseClient.Pages.Dashboard.Index>("scores-grid");
 
 await builder.Build().RunAsync();
 

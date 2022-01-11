@@ -8,10 +8,21 @@
     
         <AuthorizeView>
             <Authorized Context="authUser">
-                <AvatarDropdown Name="@FullUserName"
+                
+                @{
+                    var showUsername = _currentUser.Name;
+                    if (!string.IsNullOrEmpty(_currentUser.PreferredUsername))
+                    {
+                        showUsername = $"{showUsername} ({_currentUser.PreferredUsername})";
+                    }
+                }
+                
+                <AvatarDropdown Name="@showUsername"
                                 Avatar="@_currentUser.Avatar"
                                 MenuItems="@AvatarMenuItems"
-                                OnItemSelected="HandleSelectUser" />
+                                OnItemSelected="HandleSelectUser"
+                                                
+                                />
             </Authorized> 
             <NotAuthorized>
                 <a href="bff/login">Log in</a>

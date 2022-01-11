@@ -15,14 +15,14 @@ public partial class Index
     private List<Score> scores;
 
 
-    [Parameter] public string? SearchName { get; set; }
+    [Parameter] public string? SearchUserName { get; set; }
+    [Parameter] public string? SearchFullName { get; set; }
 
     [Inject] private ScoresData.ScoresDataClient _scoredDataClient { get; set; }
 
-    string[] categories = Array.Empty<string>();
-    string[] subcategories = Array.Empty<string>();
-    string searchName = string.Empty;
-    int minStock, maxStock = 50000;
+    string searchUserName = string.Empty;
+    string searchFullName = string.Empty;
+    int minScore, maxScore = 1000;
 
     IQueryable<Score>? GetFilteredScores()
     {
@@ -33,30 +33,25 @@ public partial class Index
 
         var result = db.Scores.AsNoTracking().AsQueryable();
         
+        if (!string.IsNullOrEmpty(searchUserName))
+        {
+            result = result.Where(x => EF.Functions.Like(x.UserName, searchUserName.Replace("%", "\\%") + "%", "\\"));
+        }
+
+        if (!string.IsNullOrEmpty(searchFullName))
+        {
+            result = result.Where(x => EF.Functions.Like(x.FullName, searchFullName.Replace("%", "\\%") + "%", "\\"));
+        }
+
+        if (minScore > 0)
+        {
+            result = result.Where(x => x.RiskScore >= minScore);
+        }
+        if (maxScore < 1000)
+        {
+            result = result.Where(x => x.RiskScore <= maxScore);
+        }
         
-        /*
-        
-        if (categories.Any())
-        {
-            result = result.Where(x => categories.Contains(x.Category));
-        }
-        if (subcategories.Any())
-        {
-            result = result.Where(x => subcategories.Contains(x.Subcategory));
-        }
-        if (!string.IsNullOrEmpty(searchName))
-        {
-            result = result.Where(x => EF.Functions.Like(x.Name, searchName.Replace("%", "\\%") + "%", "\\"));
-        }
-        if (minStock > 0)
-        {
-            result = result.Where(x => x.Stock >= minStock);
-        }
-        if (maxStock < 50000)
-        {
-            result = result.Where(x => x.Stock <= maxStock);
-        }
-        */
 
         return result;
     }
@@ -74,7 +69,8 @@ public partial class Index
 
     protected override void OnParametersSet()
     {
-        searchName = SearchName ?? string.Empty;
+        searchFullName = SearchFullName ?? string.Empty;
+        searchUserName = SearchUserName ?? string.Empty;
     }
 
     public void Dispose()
@@ -82,10 +78,6 @@ public partial class Index
         db?.Dispose();
         _dataSynchronizer.OnUpdate -= StateHasChanged;
     }
-
-
-
-
 
 
     private RenderFragment Info(string title, string value, bool bordered = false)

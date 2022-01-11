@@ -44,4 +44,8 @@
       <Folder Include="Components\GlobalHeader" />
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\QuickGrid\QuickGrid.csproj" />
+    </ItemGroup>
+
 </Project>
