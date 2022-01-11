@@ -21,13 +21,15 @@
                         <Card>
                             <Row Gutter="24">
                                 <AntDesign.Col Sm="8" Xs="24">
-                                    @Info("Total scores for last 24 hours", "XXXX", true)
+                                    @Info("Total number of scores synced", _total.ToString(), true)
                                 </AntDesign.Col>
+                                
                                 <AntDesign.Col Sm="8" Xs="24">
-                                    @Info("Scores over risk 750", "YYYY", true)
+                                    @Info("Scores over risk 750", _totalOver750.ToString(), true)
                                 </AntDesign.Col>
+                                
                                 <AntDesign.Col Sm="8" Xs="24">
-                                    @Info("Investigated (last 24 hours)", "ZZZZ")
+                                    @Info("Total scores in local database", _totalInLocalDb.ToString(), true)
                                 </AntDesign.Col>
                             </Row>
                         </Card>
@@ -38,8 +40,6 @@
                               BodyStyle="padding: 0 32px 40px 32px">
                             <ChildContent>
 
-
-                                @*@if (scores != null && scores.Any())*@
                                 @if (db is not null)
                                 {
                                     <div class="score-grid">
@@ -78,75 +78,9 @@
                                                 </ColumnOptions>
                                                 
                                             </TemplateColumn>
-
-                                            @*
-
-                                                <TemplateColumn Title="Category" SortBy="@(items => items.SortByAscending(x => x.Category).ThenAscending(x => x.Subcategory))" Class="col-category">
-                                                <ChildContent>@context.Category / @context.Subcategory</ChildContent>
-                                                <ColumnOptions>
-                                                <p>Category (@categories.Length)</p>
-                                                <select multiple class="w-64 bg-gray-100 border-grey-500 border my-4" @bind="categories" @onclick="@(() => subcategories = Array.Empty<string>())">
-                                                @foreach (var name in db.Parts.Select(x => x.Category).Distinct())
-                                                {
-                                                <option>@name</option>
-                                                }
-                                                </select>
-
-                                                <p>Subcategory (@subcategories.Length)</p>
-                                                <select multiple class="w-64 bg-gray-100 border-grey-500 border my-4" @bind="subcategories">
-                                                @foreach (var name in db.Parts.Where(x => categories.Contains(x.Category)).Select(x => x.Subcategory).Distinct())
-                                                {
-                                                <option>@name</option>
-                                                }
-                                                </select>
-
-                                                <div><button class="bg-gray-200 px-5 py-1 mb-2" @onclick="@(() => { categories = Array.Empty<string>(); subcategories = Array.Empty<string>(); })">Reset</button></div>
-                                                </ColumnOptions>
-                                                </TemplateColumn>
-
-                                                <PropertyColumn Title="Name" Property="@(x => x.Name)" Class="col-name" OnCellClicked="@((Part part) => { selectedPart = part; })">
-                                                <ColumnOptions>
-                                                <input @bind="searchName" @bind:event="oninput" type="search" placeholder="Search..." />
-                                                </ColumnOptions>
-                                                </PropertyColumn>
-
-                                                <PropertyColumn Title="Location" Property="@(x => x.Location)" Class="col-location" />
-
-                                                <PropertyColumn Title="Stock" Property="@(x => x.Stock)" Format="N0" Align="Align.Right" Class="col-stock">
-                                                <ColumnOptions>
-                                                <p>Min stock</p>
-                                                <input type="range" @bind="minStock" @bind:event="oninput" min="0" max="50000" />
-                                                <p>Max stock</p>
-                                                <input type="range" @bind="maxStock" @bind:event="oninput" min="0" max="50000" />
-                                                </ColumnOptions>
-                                                </PropertyColumn>
-
-                                                <PropertyColumn Title="Cost ($)" Property="@(x => x.PriceCents/100)" Format="N0" Align="Align.Right" Class="col-cost" />
-                                            *@
                                         </Grid>
-
                                     </div>
-
-
-                                    @*
-                                        <Table @ref="table"
-                                        TItem="Score"
-                                        DataSource="@GetFilteredScores()"
-                                        Total="_total"
-                                        PageIndex="0"
-                                        PageSize="_total"
-                                        >
-                                        <Column @bind-Field="@context.Id" Sortable />
-                                        <Column @bind-Field="@context.CreatedOn" Format="yyyy-MM-dd" Sortable />
-                                        <Column @bind-Field="@context.UserName" Sortable />
-                                        <Column @bind-Field="@context.FullName" Sortable />
-                                        <Column @bind-Field="@context.IpAddress" Sortable />
-                                        <Column @bind-Field="@context.City" Sortable />
-                                        <Column @bind-Field="@context.RiskScore" Sortable />
-                                        </Table>
-                                    *@
                                 }
-
 
                             </ChildContent>
                         </Card>

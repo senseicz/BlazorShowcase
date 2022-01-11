@@ -1,5 +1,4 @@
-﻿using AntDesign;
-using BlazorShowcase.Data;
+﻿using BlazorShowcase.Data;
 using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
 using ShowcaseClient.Data;
@@ -9,9 +8,9 @@ namespace ShowcaseClient.Pages.Dashboard;
 public partial class Index
 {
     ClientSideDbContext? db;
-    ITable table;
     int _total = 0;
-
+    private int _totalOver750 = 0;
+    private int _totalInLocalDb = 0;
     private List<Score> scores;
 
 
@@ -56,15 +55,37 @@ public partial class Index
         return result;
     }
 
+    private async Task<int> GetScoresOverThreshold()
+    {
+        if (db is null)
+        {
+            return 0;
+        }
+
+        var result = await db.Scores.CountAsync(x => x.RiskScore >= 750);
+
+        return result;
+    }
+
+    private async Task<int> GetScoresInLocalDatabase()
+    {
+        if (db is null)
+        {
+            return 0;
+        }
+
+        var result = await db.Scores.CountAsync();
+
+        return result;
+    }
+
     protected override async Task OnInitializedAsync()
     {
         db = await _dataSynchronizer.GetPreparedDbContextAsync();
         _dataSynchronizer.OnUpdate += StateHasChanged;
         _total = _dataSynchronizer.SyncTotal;
-
-
-        //var data = await _scoredDataClient.GetScoresAsync(new ScoreRequest());
-        //scores = data.Scores.ToList();
+        _totalOver750 = await GetScoresOverThreshold();
+        _totalInLocalDb = await GetScoresInLocalDatabase();
     }
 
     protected override void OnParametersSet()
