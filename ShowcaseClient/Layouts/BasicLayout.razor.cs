@@ -14,9 +14,9 @@ namespace ShowcaseClient.Layouts
 
             var dashboardChildrens = new List<MenuDataItem>
             {
-                new MenuDataItem() { Path = "/", Name = "Scores", Key = "dashboard.scores" },
-                new MenuDataItem()
-                    { Path = "/dashboard/alerts", Name = "Alerts", Key = "dashboard.alerts", Icon = "alert" },
+                new MenuDataItem() { Path = "/", Name = "Home", Key = "dashboard.home", Icon="icon-c-sharp-l"  },
+                new MenuDataItem() { Path = "/scores", Name = "Scores", Key = "dashboard.scores", Icon="desktop" },
+                new MenuDataItem() { Path = "/alerts", Name = "Alerts", Key = "dashboard.alerts", Icon = "alert" },
             };
 
             var menu = new List<MenuDataItem>
