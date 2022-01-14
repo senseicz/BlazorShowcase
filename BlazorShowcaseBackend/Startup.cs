@@ -48,7 +48,6 @@ namespace BlazorShowcaseBackend
                     options.Scope.Clear();
                     options.Scope.Add("openid");
                     options.Scope.Add("profile");
-                    //options.Scope.Add("apiapi");
                     options.Scope.Add("offline_access");
                 });
         }

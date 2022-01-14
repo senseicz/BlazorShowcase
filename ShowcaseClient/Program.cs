@@ -1,7 +1,6 @@
 using AntDesign.ProLayout;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Web;
-using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Serilog;
 using Serilog.Core;
@@ -25,7 +24,6 @@ var options = new Options();
 builder.Configuration.Bind(options);
 builder.Services.AddSingleton(options);
 
-var bffUri = options.BffUri;
 builder.RootComponents.RegisterAsCustomElement<App>("blazor-app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
@@ -36,12 +34,9 @@ builder.Services.AddScoped<AuthenticationStateProvider, BffAuthenticationStatePr
 // Supply HttpClient instances that include access tokens when making requests to the server project
 builder.Services.AddTransient<AntiforgeryHandler>();
 
-
-
 builder.Services.AddHttpClient("backend", client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress)) //bffUri
     .AddHttpMessageHandler<AntiforgeryHandler>();
 builder.Services.AddTransient(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("backend"));
-
 
 // gRPC-Web client with auth
 builder.Services.AddShowcaseClientDataClient((services, options) =>
@@ -53,7 +48,6 @@ builder.Services.AddShowcaseClientDataClient((services, options) =>
     options.MessageHandler = authEnabledHandler;
 });
 
-
 // Sets up EF Core with Sqlite
 builder.Services.AddShowcaseDataDbContext();
 
@@ -61,15 +55,7 @@ builder.Services.AddAntDesign();
 builder.Services.Configure<ProSettings>(builder.Configuration.GetSection("ProSettings"));
 
 builder.Services.AddScoped<IUserService, UserService>();
-//builder.Services.AddSingleton<PeriodicExecutor>();
 
-//builder.Services.AddScoped<AlertsService>();
-
-var host = builder.Build();
-
-
-
-
-await host.RunAsync();
+await builder.Build().RunAsync();
 
 

@@ -1,12 +1,10 @@
 ﻿@page "/alerts"
 
+
+
 <AuthorizeView>
     <Authorized Context="authUser">
         
-        <div>
-            Alerts: @_alerts.Count
-        </div>
-
         <PageContainer Title="Alerts">
             <ChildContent>
                 <AntList DataSource="@_alerts" TItem="BlazorShowcase.Data.Alert" ItemLayout="@ListItemLayout.Vertical">
