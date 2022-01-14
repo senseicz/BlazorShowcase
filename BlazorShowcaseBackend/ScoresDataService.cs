@@ -16,7 +16,7 @@ namespace BlazorShowcaseBackend
 
         public override async Task<ScoreResponse> GetScores(ScoreRequest request, ServerCallContext context)
         {
-            Log.Information("Request arrived, request {req}", JsonConvert.SerializeObject(request, Formatting.Indented));
+            //Log.Information("Request arrived, request {req}", JsonConvert.SerializeObject(request, Formatting.Indented));
             
             var response = new ScoreResponse { Count = 0 };
 
@@ -35,10 +35,32 @@ namespace BlazorShowcaseBackend
                 response.Scores.AddRange(scores.Select(MapToTransferObject));
             }
 
-
-            Log.Information("{count} Scores sent away ({forSure})", response.Count, response.Scores.Count);
+            //Log.Information("{count} Scores sent away ({forSure})", response.Count, response.Scores.Count);
 
             return response;
+        }
+
+        public override async Task GetAlerts(AlertRequest request,
+            IServerStreamWriter<Alert> responseStream,
+            ServerCallContext context)
+        {
+            var scoreGenerator = new FakeDataGenerator();
+            var random = new Random();
+            
+            while (true)
+            {
+                var alert = new Alert()
+                {
+                    CreatedOn = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds(),
+                    Id = Guid.NewGuid().ToString(),
+                    Score = MapToTransferObject(scoreGenerator.GenerateFakeScores(1).First())
+                };
+
+                await responseStream.WriteAsync(alert);
+                
+                var randomNumberOfSeconds = random.Next(5, 15);
+                Thread.Sleep(randomNumberOfSeconds * 1000);
+            }
         }
 
         private BlazorShowcase.Data.Score MapToTransferObject(Shared.Score score)

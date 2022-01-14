@@ -1,0 +1,39 @@
+﻿@page "/alerts"
+
+
+
+<AuthorizeView>
+    <Authorized Context="authUser">
+        
+        <PageContainer Title="Alerts">
+            <ChildContent>
+                <AntList DataSource="@_alerts" TItem="BlazorShowcase.Data.Alert" ItemLayout="@ListItemLayout.Vertical">
+                    <ChildContent Context="item">
+                        <ListItem>
+                            <ListItemMeta>
+                                <DescriptionTemplate>
+                                    @item.Score.FullName | @item.Score.UserName | @item.Score.IpAddress | <ShowcaseClient.Components.ScoreProgressBar Score="@item.Score.RiskScore" WidthInPixels="200"/>
+                                </DescriptionTemplate>
+                                <TitleTemplate>
+                                    Alert id @item.Id, created on @item.CreatedOnDateTime.ToString("f")
+                                </TitleTemplate>
+                            </ListItemMeta>
+                        </ListItem>
+                    </ChildContent>
+                </AntList>
+            </ChildContent>
+        </PageContainer>
+
+    </Authorized>
+
+    <NotAuthorized>
+        <Result Status="403"
+                IsShowIcon="false"
+                Title="Nudge nudge, wink wink, log in!">
+
+            <div class="d-flex justify-content-center">
+                <img src="abMjEpr_700bwp.webp" />
+            </div>
+        </Result>
+    </NotAuthorized>
+</AuthorizeView>

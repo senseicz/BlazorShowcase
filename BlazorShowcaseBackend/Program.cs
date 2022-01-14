@@ -64,8 +64,6 @@ public class Program
                         "[{Timestamp:HH:mm:ss} {Level}] {SourceContext}{NewLine}{Message:lj}{NewLine}{Exception}{NewLine}",
                         theme: AnsiConsoleTheme.Code));
 
-                Log.Information("STARTUP!!!!");
-
                 webBuilder.UseStartup<Startup>();
             });
 }
