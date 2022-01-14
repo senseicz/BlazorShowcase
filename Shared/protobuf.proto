@@ -3,7 +3,8 @@ syntax = "proto3";
 option csharp_namespace = "BlazorShowcase.Data";
 
 service ScoresData {
-	rpc GetScores(ScoreRequest) returns (ScoreResponse);
+	rpc GetScores(ScoreRequest) returns (ScoreResponse) {}
+    rpc GetAlerts(AlertRequest) returns (stream Alert) {}
 }
 
 message ScoreRequest {
@@ -25,4 +26,12 @@ message Score {
     string ipAddress = 6;
     string city = 7;
     int32 riskScore = 8;
+}
+
+message AlertRequest{}
+
+message Alert{
+    string id = 1;
+    int64 createdOn = 2;
+    Score score = 3;
 }
