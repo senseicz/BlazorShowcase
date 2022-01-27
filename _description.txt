@@ -1,0 +1,6 @@
+Blazor showcase will be a wild demo to show off some new technologies and best practices. First we look at
+new security standards around SPAs and how to properly secure them using Duende.BFF project. Then we move to the
+new kid of the block in communication standards for microservices called gRPC. Lastly, king of the show, Blazor,
+will enter the stage and will demonstrate use of SQL Lite and Entity Framework Core running directly in the 
+browser to sort and filter very large data loads in a real time with no use of server, incl. fully disconnected
+environment.
