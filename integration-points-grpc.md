@@ -41,6 +41,18 @@
             <Protobuf Include="..\Shared\protobuf.proto" GrpcServices="Server" />
         </ItemGroup>
 
+* Startup.cs
+
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        {
+            .
+            .  
+            app.UseRouting();
+            app.UseGrpcWeb();
+            app.UseEndpoints(....);
+        }
+
+        
 * "Data" service 
 
         public class ScoresDataService : ScoresData.ScoresDataBase
